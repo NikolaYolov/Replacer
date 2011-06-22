@@ -4,7 +4,7 @@
 #include "defs.h"
 
 struct s_str {
-	int size_m;
+	int size;
 	lett_t * str_mp;
 };
 

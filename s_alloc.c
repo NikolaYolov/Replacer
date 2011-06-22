@@ -24,7 +24,7 @@ void mem_init() {
 
 lett_t * alloc_n(int n) {
 	int old;
-	if (cur_ptr + n > cur_size) {
+	while (cur_ptr + n > cur_size) {
 		cur_size *= 2;
 		cur_ptr = 0;
 		head->next_mp = (struct storage * )malloc(sizeof *head + sizeof start->memory_mp[0] * cur_size);

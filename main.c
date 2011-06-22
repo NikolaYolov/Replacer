@@ -4,10 +4,22 @@
 #include "translate.h"
 #include "s_alloc.h"
 #include "const.h"
+#include "log.h"
 
 int main(int argc, char * argv[]) {
 	struct a_table translator;
 	FILE * dict = 0, * in = 0, * out = 0;
+
+	LOG("This is a debug version!");
+
+	if (argc == 1) {
+		printf("Changes a text using a dictionary by replacing each occurrence of a word in the dictionary with the proper image word.\n"
+			"Syntaxis: replacer dict input output\n"
+			"dict is a text file with word pairs\n"
+			"input is the file to be changed\n"
+			"output is the result file.\n");
+		return 0;
+	}
 
 	if (argc != 4) {
 		printf("Invalid argumets! Extected 3, provided: %d.\n", argc - 1);
@@ -24,10 +36,12 @@ int main(int argc, char * argv[]) {
 	mem_init();
 
 	/* initialize the table */
-	a_create_n(&translator, init_size);
+	a_create_n(&translator, INIT_SIZE);
 
 	/* step1: create a trie */
 	create_trie(&translator, dict);
+
+	fclose(dict);
 
 	/* step2: create the full automaton */
 	add_fail_links(&translator);
@@ -53,6 +67,9 @@ int main(int argc, char * argv[]) {
 
 	/* finally we are going to use the automaton */
 	travers(&translator, in, out);
+
+	fclose(in);
+	fclose(out);
 
 	/* finalize the table */
 	a_free(&translator);

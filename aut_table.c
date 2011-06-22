@@ -3,37 +3,40 @@
 #include <stdlib.h>
 #include <memory.h>
 
+#include "log.h"
+
 void a_create_n(struct a_table * res, int n) {
-	res->tbl_mp = (struct row *)calloc(n, sizeof res->tbl_mp[0]);
-	res->size_m = 1;
-	res->space_m = n;
+	res->tbl = (struct row *)calloc(n, sizeof res->tbl[0]);
+	/* LOG("alloc initial memory = %d, ptr = %p\n", n, res->tbl); */
+	res->size = 1;
+	res->space = n;
 }
 
 void a_free(struct a_table * t) {
-	free(t->tbl_mp);
+	free(t->tbl);
 }
 
-void inc_size(struct a_table * t) {
-	int bytes = t->space_m * sizeof *t->tbl_mp;
-	struct row * new = (struct row *)calloc(t->space_m * 2, sizeof *t->tbl_mp);
-	memcpy(new, t->tbl_mp, bytes);
-	free(t->tbl_mp);
-	t->tbl_mp = new;
-	t->space_m *= 2;
+void a_a_a_inc_size(struct a_table * t) {
+	const int bytes = t->space * sizeof t->tbl[0];
+	struct row * new;
+	t->space *= 2;
+	new = (struct row *)calloc(t->space, sizeof t->tbl[0]);
+	/* LOG("alloc memory = %d, new ptr = %p, old ptr = %p\n", t->space, new, t->tbl); */
+	memcpy(new, t->tbl, bytes);
+	free(t->tbl);
+	t->tbl = new;
 }
 
 #if !defined NDEBUG
 
-#include "log.h"
-
-void print_state(struct a_table * t, int s) {
+void a_a_print_state(struct a_table * t, int s) {
 	LOG("state %d description:\n\t"
 	    "is final = %d\n\t"
-	    "phi = %s\n\t", s, t->tbl_mp[s].is_final_m, t->tbl_mp[s].phi_mp.str_mp);
-	for (int ch = 1; ch < alpha_s; ++ch) {
-		const struct field * fld = get_trans_c(t, s, (lett_t)ch);
-		if (str_is_init(&fld->lambda_m)) {
-			LOG("%d -> %d, a = %s\t", (int)ch, fld->to_m, fld->lambda_m.str_mp);
+	    "phi = %s\n\t", s, t->tbl[s].is_final, t->tbl[s].phi.str_mp);
+	for (int ch = 1; ch < alphabet_size; ++ch) {
+		const struct field * fld = a_get_trans_c(t, s, (lett_t)ch);
+		if (str_is_init(&fld->lambda)) {
+			LOG("%d -> %d, a = %s\t", (int)ch, fld->to, fld->lambda.str_mp);
 			if (ch % 5 == 0)
 				LOG("\n\t");
 		}
@@ -41,5 +44,5 @@ void print_state(struct a_table * t, int s) {
 	LOG("\n");
 }
 
-#endif
+#endif /* NDEBUG */
 

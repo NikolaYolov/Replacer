@@ -11,24 +11,24 @@
  */
 
 typedef int state_t;
-#define init_state  0
-#define inval_state  -1
+#define INITIAL_STATE 0
+#define INVALID_STATE -1
 
 struct field {
-	state_t to_m;
-	struct s_str lambda_m;
+	state_t to;
+	struct s_str lambda;
 };
 
 struct row {
-	struct field transit_mp[alpha_s];
-	struct s_str phi_mp;
-	int is_final_m;
+	struct field transit[alphabet_size];
+	struct s_str phi;
+	int is_final;
 };
 
 struct a_table {
-	struct row * tbl_mp;
-	int size_m;
-	int space_m;
+	struct row * tbl;
+	int size;
+	int space;
 };
 
 /**
@@ -37,42 +37,42 @@ struct a_table {
 
 void a_create_n(struct a_table * res, int n);
 void a_free(struct a_table * t);
-void inc_size(struct a_table * t);
+void a_a_a_inc_size(struct a_table * t);
 
 #if !defined NDEBUG
-void print_state(struct a_table * t, int s);
+void a_a_print_state(struct a_table * t, int s);
 #endif
 
 /**
  * Inline implementation
  */
 
-static inline struct field * get_trans(struct a_table * a, state_t s, lett_t l) {
-	assert(s < a->size_m);
-	return &(a->tbl_mp[s].transit_mp[(int)l]);
+static inline struct field * a_get_trans(struct a_table * a, state_t s, lett_t l) {
+	assert(s < a->size);
+	return &(a->tbl[s].transit[(int)l]);
 }
 
-static inline const struct field * get_trans_c(const struct a_table * a, state_t s, lett_t l) {
-	assert(s < a->size_m);
-	return &(a->tbl_mp[s].transit_mp[(int)l]);
+static inline const struct field * a_get_trans_c(const struct a_table * a, state_t s, lett_t l) {
+	assert(s < a->size);
+	return &(a->tbl[s].transit[(int)l]);
 }
 
-/* inval_state for fail */
-static inline state_t follow_trans(const struct a_table * a, state_t s, lett_t l) {
-	assert(s < a->size_m);
-	const struct field * fld = get_trans_c(a, s, l);
-	return str_is_init(&fld->lambda_m)? fld->to_m : inval_state;
+/* INVALID_STATE for fail */
+static inline state_t a_follow_trans(const struct a_table * a, state_t s, lett_t l) {
+	assert(s < a->size);
+	const struct field * fld = a_get_trans_c(a, s, l);
+	return str_is_init(&fld->lambda)? fld->to : INVALID_STATE;
 }
 
 /* all states are not final by default */
-static inline void set_final(const struct a_table * a, state_t s) {
-	assert(s < a->size_m);
-	a->tbl_mp[s].is_final_m = 1;
+static inline void a_set_final(const struct a_table * a, state_t s) {
+	assert(s < a->size);
+	a->tbl[s].is_final = 1;
 }
 
 static inline int is_final(const struct a_table * a, state_t s) {
-	assert(s < a->size_m);
-	return a->tbl_mp[s].is_final_m;
+	assert(s < a->size);
+	return a->tbl[s].is_final;
 }
 
 #endif /* AUTOMATA_TABLE_H */
