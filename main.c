@@ -3,10 +3,10 @@
 #include "aut_table.h"
 #include "translate.h"
 #include "s_alloc.h"
+#include "const.h"
 
 int main(int argc, char * argv[]) {
 	struct a_table translator;
-	static const int init_size = 0x00080000; // 2^19 states initially
 	FILE * dict = 0, * in = 0, * out = 0;
 
 	if (argc != 4) {

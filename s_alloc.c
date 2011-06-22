@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#include "const.h"
+
 struct storage {
 	struct storage * next_mp;
 	lett_t memory_mp[0];
@@ -13,7 +15,7 @@ static int cur_size;
 static int cur_ptr;
 
 void mem_init() {
-	cur_size = 0x00100000; // 1MB
+	cur_size = INITIAL_ALLOC_MEMORY;
 	cur_ptr = 0;
 
 	start = head = (struct storage * )malloc(sizeof *head + sizeof start->memory_mp[0] * cur_size);
@@ -26,6 +28,8 @@ lett_t * alloc_n(int n) {
 		cur_size *= 2;
 		cur_ptr = 0;
 		head->next_mp = (struct storage * )malloc(sizeof *head + sizeof start->memory_mp[0] * cur_size);
+		head = head->next_mp;
+		head->next_mp = 0;
 	}
 	old = cur_ptr;
 	cur_ptr += n;

@@ -6,28 +6,29 @@
 
 #include "aut_table.h"
 #include "s_alloc.h"
-#include "log.h"
+#include "const.h"
+/* #include "log.h" */
 
 static struct s_str eps = { 0, (lett_t *)"" };
 
 static inline struct s_str concat(const struct s_str l, const struct s_str r) {
 	int len_sum = l.size_m + r.size_m;
 	lett_t * s_concat = alloc_n(len_sum + 1);
-	memcpy(s_concat, l.str_mp, l.size_m);
-	memcpy(s_concat + l.size_m, r.str_mp, r.size_m);
+	memcpy(s_concat, l.str_mp, l.size_m * sizeof s_concat[0]);
+	memcpy(s_concat + l.size_m, r.str_mp, r.size_m * sizeof s_concat[0]);
 	s_concat[len_sum] = '\0';
 	return (struct s_str){ len_sum, s_concat };
 }
 
 void create_trie(struct a_table * t, FILE * inp) {
 	struct field * fld;
-	lett_t word_buf[0x00001000]; // 4KB is the max len of a word
-	lett_t tran_buf[0x00001000];
+	lett_t word_buf[WORD_MAX_LEN]; // 4KB is the max len of a word
+	lett_t tran_buf[WORD_MAX_LEN];
 	int i, s_len;
 	state_t q, next;
 
 	while (fscanf(inp, "%s %s\n", word_buf, tran_buf) == 2) {
-		LOG("new dict pair = %s -> %s\n", word_buf, tran_buf);
+		/* LOG("new dict pair = %s -> %s\n", word_buf, tran_buf); */
 
 		q = init_state;
 		for (i = 0; word_buf[i] != '\0'; ++i) {
@@ -38,8 +39,8 @@ void create_trie(struct a_table * t, FILE * inp) {
 				q = next;
 		}
 
-		LOG("\tmatched len = %d\n", i);
-		LOG("\tstarted from state = %d\n", q);
+		/* LOG("\tmatched len = %d\n", i); */
+		/* LOG("\tstarted from state = %d\n", q); */
 		for ( ; word_buf[i] != '\0'; ++i) {
 			/* next will be a new state */
 			if ((next = t->size_m++) == t->space_m)
@@ -52,8 +53,8 @@ void create_trie(struct a_table * t, FILE * inp) {
 			q = next;
 		}
 
-		LOG("\ttotal len = %d\n", i);
-		LOG("\tfinished in state = %d, rem states = %d\n", q, t->space_m - q);
+		/* LOG("\ttotal len = %d\n", i); */
+		/* LOG("\tfinished in state = %d, rem states = %d\n", q, t->space_m - q); */
 		assert(is_final(t, q) == 0);
 		set_final(t, q);
 
@@ -107,7 +108,7 @@ void add_fail_links(struct a_table * t) {
 	t->tbl_mp[init_state].phi_mp = eps;
 
 	while (q_head < states - 1) {
-		LOG("q_head = %d, q_tail = %d, size = %d\n", q_head, q_tail, states);
+		/* LOG("q_head = %d, q_tail = %d, size = %d\n", q_head, q_tail, states); */
 		assert(q_head < q_tail);
 
 		cur = queue_cur[q_head];
@@ -139,7 +140,7 @@ void add_fail_links(struct a_table * t) {
 		++q_head;
 	}
 
-	LOG("loop endted\nq_head = %d, q_tail = %d, size = %d\n", q_head, q_tail, states);
+	/* LOG("loop endted\nq_head = %d, q_tail = %d, size = %d\n", q_head, q_tail, states); */
 	assert(q_head == states - 1 && q_tail == states - 1);
 
 	free(queue_gamma);
@@ -148,7 +149,6 @@ void add_fail_links(struct a_table * t) {
 }
 
 void travers(const struct a_table * t, FILE * in, FILE * out) {
-	static const int chunk_size = 0x00100000; // 1MB
 	lett_t * const read_buffer = (lett_t *)malloc(chunk_size * sizeof read_buffer[0]);
 	lett_t * const write_buffer = (lett_t *)malloc(chunk_size * sizeof write_buffer[0]);
 	int read_ptr, write_ptr = 0;
